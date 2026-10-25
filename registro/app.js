@@ -43,3 +43,56 @@ form.addEventListener('focusout', (e) => {
     validarCampo(form.elements.confirmar);
   }
 });
+
+const boton = form.querySelector('button[type="submit"]');
+const mensaje = document.querySelector('#mensaje');
+
+// Quita los mensajes de error que quedan en pantalla
+function limpiarErrores() {
+  for (const p of form.querySelectorAll('.error')) p.textContent = '';
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  mensaje.textContent = '';
+  validarConfirmacion();
+
+  // Muestra todos los errores al intentar enviar
+  for (const campo of form.elements) {
+    if (campo.willValidate) validarCampo(campo);
+  }
+
+  if (!form.checkValidity()) {
+    form.querySelector(':invalid').focus(); // lleva al primer error
+    return;
+  }
+
+  boton.disabled = true;
+  boton.textContent = 'Enviando…';
+
+  try {
+    const datos = Object.fromEntries(new FormData(form));
+    delete datos.confirmar; // la confirmación no se envía
+
+    const res = await fetch(form.action, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(datos),
+    });
+
+    // fetch solo falla sin red; un 404 o 500 llega como respuesta normal
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const creado = await res.json();
+    mensaje.textContent = `¡Cuenta creada! Id: ${creado.id}`;
+    form.reset();
+    validarConfirmacion();
+    limpiarErrores();
+  } catch (err) {
+    mensaje.textContent = 'No se pudo enviar. Revisa tu conexión e inténtalo de nuevo.';
+    console.error(err);
+  } finally {
+    boton.disabled = false;
+    boton.textContent = 'Crear cuenta';
+  }
+});
