@@ -107,3 +107,34 @@ button:disabled {
 #mensaje {
   min-height: 1.2em;
 }
+
+fieldset {
+  margin: 0 0 1rem;
+  padding: 0;
+  border: 0;
+}
+
+legend {
+  padding: 0;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.fila-telefono {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.25rem 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.fila-telefono label,
+.fila-telefono .error {
+  grid-column: 1 / -1;
+}
+
+button.secundario {
+  color: var(--color-boton);
+  background: transparent;
+  border: 2px solid var(--color-boton);
+}

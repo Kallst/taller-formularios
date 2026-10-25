@@ -1,13 +1,21 @@
-import { validarCampo, validarFormulario, reglas } from './validaciones.js';
+import {
+  validarCampo, validarFormulario, validarTelefono, reglas, MAX_TELEFONOS,
+} from './validaciones.js';
 
 const form = document.querySelector('#registro');
 const boton = form.querySelector('button[type="submit"]');
 const mensaje = document.querySelector('#mensaje');
 const saludo = document.querySelector('#saludo');
+const lista = document.querySelector('#telefonos');
+const botonAgregar = document.querySelector('#agregar-telefono');
 
 const MSG_CORREO_USADO = 'Este correo ya tiene una cuenta. ¿Quieres iniciar sesión?';
 
-const leerDatos = () => Object.fromEntries(new FormData(form));
+// Los teléfonos repetidos se leen con getAll, no con fromEntries
+const leerDatos = () => {
+  const datos = new FormData(form);
+  return { ...Object.fromEntries(datos), telefono: datos.getAll('telefono') };
+};
 
 // Muestra o quita el error de un campo y actualiza aria-invalid
 function mostrarError(nombre, texto) {
@@ -23,6 +31,12 @@ function mostrarEstado(nombre, texto) {
   document.getElementById(`${nombre}-error`).textContent = texto;
 }
 
+// Igual que mostrarError, pero recibe el input porque los teléfonos comparten name
+function mostrarErrorTelefono(input, texto) {
+  input.setAttribute('aria-invalid', texto ? 'true' : 'false');
+  document.getElementById(`${input.id}-error`).textContent = texto ?? '';
+}
+
 function limpiarErrores() {
   for (const nombre of Object.keys(reglas)) mostrarError(nombre, null);
 }
@@ -30,6 +44,11 @@ function limpiarErrores() {
 // Se valida al salir del campo (focusout), no a cada tecla
 form.addEventListener('focusout', (e) => {
   const nombre = e.target.name;
+
+  if (nombre === 'telefono') {
+    mostrarErrorTelefono(e.target, validarTelefono(e.target.value));
+    return;
+  }
   if (!(nombre in reglas)) return;
 
   const error = validarCampo(nombre, leerDatos());
@@ -84,6 +103,54 @@ form.elements.email.addEventListener('input', (e) => {
   revisarCorreo(e.target.value);
 });
 
+// Teléfonos dinámicos
+let contadorTelefonos = 0; // da ids únicos aunque se quiten filas
+
+// Renumera etiquetas y botones según la posición actual de cada fila
+function actualizarTelefonos() {
+  [...lista.children].forEach((fila, i) => {
+    fila.querySelector('label').textContent = `Teléfono ${i + 1}`;
+    fila.querySelector('.quitar').setAttribute('aria-label', `Quitar teléfono ${i + 1}`);
+  });
+  botonAgregar.disabled = lista.children.length >= MAX_TELEFONOS;
+}
+
+botonAgregar.addEventListener('click', () => {
+  if (lista.children.length >= MAX_TELEFONOS) return;
+  const id = `tel-${++contadorTelefonos}`;
+  const fila = document.createElement('div');
+  fila.className = 'fila-telefono';
+  // innerHTML es seguro aquí: solo se inserta el id que genera el código
+  fila.innerHTML = `
+    <label for="${id}"></label>
+    <input id="${id}" name="telefono" type="tel" inputmode="tel"
+           autocomplete="tel" aria-describedby="${id}-error">
+    <button type="button" class="quitar secundario">Quitar</button>
+    <p id="${id}-error" class="error" aria-live="polite"></p>`;
+  lista.append(fila);
+  actualizarTelefonos();
+  fila.querySelector('input').focus();
+});
+
+// Delegación de eventos: un solo listener para todos los botones «Quitar»
+lista.addEventListener('click', (e) => {
+  if (!e.target.matches('.quitar')) return;
+  e.target.closest('.fila-telefono').remove();
+  actualizarTelefonos();
+  botonAgregar.focus();
+});
+
+// Valida todos los teléfonos y devuelve el primero con error, o null
+function validarTelefonos() {
+  let primero = null;
+  for (const input of lista.querySelectorAll('input')) {
+    const error = validarTelefono(input.value);
+    mostrarErrorTelefono(input, error);
+    if (error && !primero) primero = input;
+  }
+  return primero;
+}
+
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   mensaje.textContent = '';
@@ -95,10 +162,15 @@ form.addEventListener('submit', async (e) => {
   for (const nombre of Object.keys(reglas)) {
     mostrarError(nombre, errores[nombre]);
   }
+  const telefonoMalo = validarTelefonos();
 
   const primero = Object.keys(errores)[0];
   if (primero) {
     form.elements[primero].focus(); // lleva al primer error
+    return;
+  }
+  if (telefonoMalo) {
+    telefonoMalo.focus();
     return;
   }
 
@@ -113,6 +185,7 @@ form.addEventListener('submit', async (e) => {
     }
 
     delete datos.confirmar; // la confirmación no se envía
+    datos.telefono = datos.telefono.map((t) => t.trim()).filter(Boolean);
 
     const res = await fetch(form.action, {
       method: 'POST',
@@ -128,6 +201,8 @@ form.addEventListener('submit', async (e) => {
     // textContent muestra el texto tal cual, sin interpretarlo como HTML
     saludo.textContent = `Hola, ${datos.nombre}`;
     form.reset();
+    lista.replaceChildren();
+    actualizarTelefonos();
     limpiarErrores();
   } catch (err) {
     mensaje.textContent = 'No se pudo enviar. Revisa tu conexión e inténtalo de nuevo.';

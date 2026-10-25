@@ -59,3 +59,17 @@ export function validarFormulario(datos) {
   }
   return errores;
 }
+
+// Los teléfonos no van en `reglas`: todos comparten el name "telefono"
+export const MAX_TELEFONOS = 3;
+
+export const formatoTelefono = () =>
+  (v) => (/^\+?\d{7,15}$/.test(v)
+    ? null
+    : 'Escribe de 7 a 15 dígitos, con + opcional.');
+
+// Un teléfono vacío es válido porque el campo es opcional
+export function validarTelefono(valor) {
+  const v = String(valor).trim();
+  return v === '' ? null : formatoTelefono()(v);
+}
