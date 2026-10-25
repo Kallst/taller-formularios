@@ -3,6 +3,7 @@ import { validarCampo, validarFormulario, reglas } from './validaciones.js';
 const form = document.querySelector('#registro');
 const boton = form.querySelector('button[type="submit"]');
 const mensaje = document.querySelector('#mensaje');
+const saludo = document.querySelector('#saludo');
 
 const MSG_CORREO_USADO = 'Este correo ya tiene una cuenta. ¿Quieres iniciar sesión?';
 
@@ -86,6 +87,7 @@ form.elements.email.addEventListener('input', (e) => {
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   mensaje.textContent = '';
+  saludo.textContent = '';
 
   // Muestra todos los errores al intentar enviar
   const datos = leerDatos();
@@ -123,6 +125,8 @@ form.addEventListener('submit', async (e) => {
 
     const creado = await res.json();
     mensaje.textContent = `¡Cuenta creada! Id: ${creado.id}`;
+    // textContent muestra el texto tal cual, sin interpretarlo como HTML
+    saludo.textContent = `Hola, ${datos.nombre}`;
     form.reset();
     limpiarErrores();
   } catch (err) {
