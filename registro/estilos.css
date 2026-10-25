@@ -83,8 +83,8 @@ button:focus-visible {
 }
 
 /* Nivel 2: el error se marca solo después de interactuar con el campo */
-input:user-invalid,
-select:user-invalid {
+/* Nivel 4: el error se marca con aria-invalid desde JavaScript */
+[aria-invalid="true"] {
   border-color: var(--color-error);
 }
 
