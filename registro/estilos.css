@@ -1,7 +1,7 @@
-    :root {
+:root {
   --color-error: #c0392b;
   --color-texto: #1f2933;
-  --color-borde: #9aa5b1;
+  --color-borde: #6b7785;
   --color-fondo: #f5f7fa;
   --color-boton: #1d4ed8;
 }
@@ -58,7 +58,9 @@ button:focus-visible {
 }
 
 .campo-check input {
-  width: auto;
+  width: 1.5rem;
+  height: 1.5rem;
+  accent-color: var(--color-boton);
 }
 
 .campo-check label {
@@ -89,6 +91,7 @@ button:focus-visible {
 }
 
 button {
+  min-height: 2.75rem;
   padding: 0.6rem 1.2rem;
   font: inherit;
   font-weight: 600;
