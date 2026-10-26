@@ -1,0 +1,76 @@
+:root {
+  --color-texto: #1f2933;
+  --color-borde: #9aa5b1;
+  --color-fondo: #f5f7fa;
+  --color-boton: #1d4ed8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  color: var(--color-texto);
+  background: var(--color-fondo);
+}
+
+main {
+  max-width: 28rem;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.campo {
+  margin-bottom: 1rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 0.5rem;
+  font: inherit;
+  border: 2px solid var(--color-borde);
+  border-radius: 4px;
+}
+
+input:focus-visible,
+select:focus-visible,
+button:focus-visible {
+  outline: 3px solid var(--color-boton);
+  outline-offset: 2px;
+}
+
+/* Casilla de términos: etiqueta al lado del checkbox */
+.campo-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.campo-check input {
+  width: auto;
+}
+
+.campo-check label {
+  margin-bottom: 0;
+  font-weight: normal;
+}
+
+button {
+  padding: 0.6rem 1.2rem;
+  font: inherit;
+  font-weight: 600;
+  color: #fff;
+  background: var(--color-boton);
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
