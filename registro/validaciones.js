@@ -18,10 +18,10 @@ export const letraYNumero = () =>
     ? null
     : 'Incluye al menos una letra y un número.');
 
-export const rangoEntero = (min, max) => (v) => {
+export const rangoEntero = (min, max, msgMin) => (v) => {
   const n = Number(v);
   if (!Number.isInteger(n)) return 'Escribe un número entero.';
-  if (n < min) return `El valor mínimo es ${min}.`;
+  if (n < min) return msgMin ?? `El valor mínimo es ${min}.`;
   if (n > max) return `El valor máximo es ${max}.`;
   return null;
 };
@@ -35,7 +35,7 @@ export const reglas = {
   email: [requerido(), formatoCorreo()],
   password: [requerido(), longitud(8), letraYNumero()],
   confirmar: [requerido(), igualA('password', 'Las contraseñas no coinciden.')],
-  edad: [requerido(), rangoEntero(18, 120)],
+  edad: [requerido(), rangoEntero(18, 120, 'Debes tener al menos 18 años para registrarte.')],
   pais: [requerido('Elige un país.')],
   // Un checkbox sin marcar no viaja en FormData, así que llega como vacío
   terminos: [requerido('Debes aceptar los términos del servicio.')],
